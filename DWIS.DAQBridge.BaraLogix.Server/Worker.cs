@@ -4,6 +4,7 @@ using OSDC.DotnetLibraries.General.Common;
 using System.Reflection;
 using YPLCalibrationFromRheometer.Model;
 using DWIS.DAQBridge.BaraLogix.Model;
+using System.Linq.Expressions;
 
 namespace DWIS.DAQBridge.BaraLogix.Server
 {
@@ -47,167 +48,175 @@ namespace DWIS.DAQBridge.BaraLogix.Server
             int k = 0;
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                // process series
-                await ReadOPCUA(ActivePitRawData, Configuration?.NameSpace, Configuration?.NodeIDPrefix, Configuration?.OPCUAIDs, Configuration?.UnitConversions);
-                k++;
-                if (k == count)
+                try
                 {
-                    DateTime d1 = DateTime.UtcNow;
-                    if (ActivePitOutputData.MeasuredPressure is not null && ActivePitRawData.MeasuredPressure != null)
+                    // process series
+                    await ReadOPCUA(ActivePitRawData, Configuration?.NameSpace, Configuration?.NodeIDPrefix, Configuration?.OPCUAIDs, Configuration?.UnitConversions);
+                    k++;
+                    if (k == count)
                     {
-                        ActivePitOutputData.MeasuredPressure.Value = ActivePitRawData.MeasuredPressure.Value;
+                        DateTime d1 = DateTime.UtcNow;
+                        if (ActivePitOutputData.MeasuredPressure is not null && ActivePitRawData.MeasuredPressure != null)
+                        {
+                            ActivePitOutputData.MeasuredPressure.Value = ActivePitRawData.MeasuredPressure.Value;
+                        }
+                        if (ActivePitOutputData.MeasuredTemperature is not null && ActivePitRawData.MeasuredTemperature != null)
+                        {
+                            ActivePitOutputData.MeasuredTemperature.Value = ActivePitRawData.MeasuredTemperature.Value;
+                        }
+                        if (ActivePitOutputData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure is not null && ActivePitRawData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure != null)
+                        {
+                            ActivePitOutputData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure.Value;
+                        }
+                        if (ActivePitOutputData.PlasticViscosityAtMeasuredTemperatureAndPressure is not null && ActivePitRawData.PlasticViscosityAtMeasuredTemperatureAndPressure != null)
+                        {
+                            ActivePitOutputData.PlasticViscosityAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.PlasticViscosityAtMeasuredTemperatureAndPressure.Value;
+                        }
+                        if (ActivePitOutputData.YieldPointAtMeasuredTemperatureAndPressure is not null && ActivePitRawData.YieldPointAtMeasuredTemperatureAndPressure != null)
+                        {
+                            ActivePitOutputData.YieldPointAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YieldPointAtMeasuredTemperatureAndPressure.Value;
+                        }
+                        double? yieldStress = null;
+                        double? consistencyIndex = null;
+                        double? flowBehaviorIndex = null;
+                        if (ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure is not null &&
+                            ActivePitRawData.ShearStressAt3RPMAtMeasuredTemperatureAndPressure != null &&
+                            ActivePitRawData.ShearStressAt6RPMAtMeasuredTemperatureAndPressure != null &&
+                            ActivePitRawData.ShearStressAt100RPMAtMeasuredTemperatureAndPressure != null &&
+                            ActivePitRawData.ShearStressAt200RPMAtMeasuredTemperatureAndPressure != null &&
+                            ActivePitRawData.ShearStressAt300RPMAtMeasuredTemperatureAndPressure != null &&
+                            ActivePitRawData.ShearStressAt600RPMAtMeasuredTemperatureAndPressure != null)
+                        {
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements ??= new List<FlowCurveMeasurement>();
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Clear();
+                            FlowCurveMeasurement measurement = new FlowCurveMeasurement();
+                            if (measurement.ConcentricCylindersRotationalSpeed is not null)
+                            {
+                                measurement.ConcentricCylindersRotationalSpeed.Value = 3.0 / 60.0;
+                            }
+                            if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
+                            {
+                                measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt3RPMAtMeasuredTemperatureAndPressure.Value;
+                            }
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
+                            measurement = new FlowCurveMeasurement();
+                            if (measurement.ConcentricCylindersRotationalSpeed is not null)
+                            {
+                                measurement.ConcentricCylindersRotationalSpeed.Value = 6.0 / 60.0;
+                            }
+                            if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
+                            {
+                                measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt6RPMAtMeasuredTemperatureAndPressure.Value;
+                            }
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
+                            measurement = new FlowCurveMeasurement();
+                            if (measurement.ConcentricCylindersRotationalSpeed is not null)
+                            {
+                                measurement.ConcentricCylindersRotationalSpeed.Value = 100.0 / 60.0;
+                            }
+                            if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
+                            {
+                                measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt100RPMAtMeasuredTemperatureAndPressure.Value;
+                            }
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
+                            measurement = new FlowCurveMeasurement();
+                            if (measurement.ConcentricCylindersRotationalSpeed is not null)
+                            {
+                                measurement.ConcentricCylindersRotationalSpeed.Value = 200.0 / 60.0;
+                            }
+                            if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
+                            {
+                                measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt200RPMAtMeasuredTemperatureAndPressure.Value;
+                            }
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
+                            measurement = new FlowCurveMeasurement();
+                            if (measurement.ConcentricCylindersRotationalSpeed is not null)
+                            {
+                                measurement.ConcentricCylindersRotationalSpeed.Value = 300.0 / 60.0;
+                            }
+                            if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
+                            {
+                                measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt300RPMAtMeasuredTemperatureAndPressure.Value;
+                            }
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
+                            measurement = new FlowCurveMeasurement();
+                            if (measurement.ConcentricCylindersRotationalSpeed is not null)
+                            {
+                                measurement.ConcentricCylindersRotationalSpeed.Value = 600.0 / 60.0;
+                            }
+                            if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
+                            {
+                                measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt600RPMAtMeasuredTemperatureAndPressure.Value;
+                            }
+                            ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
+                            Calibrate(ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements, ref yieldStress, ref consistencyIndex, ref flowBehaviorIndex);
+                        }
+                        if (ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure is not null &&
+                            (consistencyIndex is not null ||
+                             ActivePitRawData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure != null))
+                        {
+                            if (consistencyIndex is not null)
+                            {
+                                ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure.Value = consistencyIndex;
+                            }
+                            else
+                            {
+                                ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure!.Value;
+                            }
+                        }
+                        if (ActivePitOutputData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure is not null &&
+                            (flowBehaviorIndex is not null ||
+                             ActivePitRawData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure != null))
+                        {
+                            if (flowBehaviorIndex is not null)
+                            {
+                                ActivePitOutputData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure.Value = flowBehaviorIndex;
+                            }
+                            else
+                            {
+                                ActivePitOutputData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure!.Value;
+                            }
+                        }
+                        if (ActivePitOutputData.YPLYieldStressAtMeasuredTemperatureAndPressure is not null &&
+                            (yieldStress is not null ||
+                             ActivePitRawData.YPLYieldStressAtMeasuredTemperatureAndPressure != null))
+                        {
+                            if (yieldStress is not null)
+                            {
+                                ActivePitOutputData.YPLYieldStressAtMeasuredTemperatureAndPressure.Value = yieldStress;
+                            }
+                            else
+                            {
+                                ActivePitOutputData.YPLYieldStressAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YPLYieldStressAtMeasuredTemperatureAndPressure!.Value;
+                            }
+                        }
+                        if (ActivePitOutputData.MeasuredPressure is not null && ActivePitRawData.MeasuredPressure != null)
+                        {
+                            ActivePitOutputData.MeasuredPressure.Value = ActivePitRawData.MeasuredPressure.Value;
+                        }
+                        if (ActivePitOutputData.MeasuredPressure is not null && ActivePitRawData.MeasuredPressure != null)
+                        {
+                            ActivePitOutputData.MeasuredPressure.Value = ActivePitRawData.MeasuredPressure.Value;
+                        }
+
+                        await PublishBlackboardAsync(ActivePitOutputData, stoppingToken);
+                        DateTime d2 = DateTime.UtcNow;
+                        double elapsed = (d2 - d1).TotalSeconds;
+                        lock (_lock)
+                        {
+                            if (Logger is not null && Logger.IsEnabled(LogLevel.Information) &&
+                                ActivePitOutputData.MeasuredPressure is not null &&
+                                ActivePitOutputData.MeasuredPressure.Value is not null)
+                            {
+                                Logger.LogInformation("Measured Pressure: " + ActivePitOutputData.MeasuredPressure.Value.Value.ToString("F3"));
+                            }
+                        }
+                        k = 0;
                     }
-                    if (ActivePitOutputData.MeasuredTemperature is not null && ActivePitRawData.MeasuredTemperature != null)
-                    {
-                        ActivePitOutputData.MeasuredTemperature.Value = ActivePitRawData.MeasuredTemperature.Value;
-                    }
-                    if (ActivePitOutputData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure is not null && ActivePitRawData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure != null)
-                    {
-                        ActivePitOutputData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.MassDensityFromCoriolisAtMeasuredTemperatureAndPressure.Value;
-                    }
-                    if (ActivePitOutputData.PlasticViscosityAtMeasuredTemperatureAndPressure is not null && ActivePitRawData.PlasticViscosityAtMeasuredTemperatureAndPressure != null)
-                    {
-                        ActivePitOutputData.PlasticViscosityAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.PlasticViscosityAtMeasuredTemperatureAndPressure.Value;
-                    }
-                    if (ActivePitOutputData.YieldPointAtMeasuredTemperatureAndPressure is not null && ActivePitRawData.YieldPointAtMeasuredTemperatureAndPressure != null)
-                    {
-                        ActivePitOutputData.YieldPointAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YieldPointAtMeasuredTemperatureAndPressure.Value;
-                    }
-                    double? yieldStress = null;
-                    double? consistencyIndex = null;
-                    double? flowBehaviorIndex = null;
-                    if (ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure is not null &&
-                        ActivePitRawData.ShearStressAt3RPMAtMeasuredTemperatureAndPressure != null &&
-                        ActivePitRawData.ShearStressAt6RPMAtMeasuredTemperatureAndPressure != null &&
-                        ActivePitRawData.ShearStressAt100RPMAtMeasuredTemperatureAndPressure != null &&
-                        ActivePitRawData.ShearStressAt200RPMAtMeasuredTemperatureAndPressure != null &&
-                        ActivePitRawData.ShearStressAt300RPMAtMeasuredTemperatureAndPressure != null &&
-                        ActivePitRawData.ShearStressAt600RPMAtMeasuredTemperatureAndPressure != null)
-                    {
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements ??= new List<FlowCurveMeasurement>();
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Clear();
-                        FlowCurveMeasurement measurement = new FlowCurveMeasurement();
-                        if (measurement.ConcentricCylindersRotationalSpeed is not null)
-                        {
-                            measurement.ConcentricCylindersRotationalSpeed.Value = 3.0  / 60.0;
-                        }
-                        if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
-                        {
-                            measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt3RPMAtMeasuredTemperatureAndPressure.Value;
-                        }
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
-                        measurement = new FlowCurveMeasurement();
-                        if (measurement.ConcentricCylindersRotationalSpeed is not null)
-                        {
-                            measurement.ConcentricCylindersRotationalSpeed.Value = 6.0 / 60.0;
-                        }
-                        if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
-                        {
-                            measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt6RPMAtMeasuredTemperatureAndPressure.Value;
-                        }
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
-                        measurement = new FlowCurveMeasurement();
-                        if (measurement.ConcentricCylindersRotationalSpeed is not null)
-                        {
-                            measurement.ConcentricCylindersRotationalSpeed.Value = 100.0 / 60.0;
-                        }
-                        if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
-                        {
-                            measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt100RPMAtMeasuredTemperatureAndPressure.Value;
-                        }
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
-                        measurement = new FlowCurveMeasurement();
-                        if (measurement.ConcentricCylindersRotationalSpeed is not null)
-                        {
-                            measurement.ConcentricCylindersRotationalSpeed.Value = 200.0 / 60.0;
-                        }
-                        if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
-                        {
-                            measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt200RPMAtMeasuredTemperatureAndPressure.Value;
-                        }
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
-                        measurement = new FlowCurveMeasurement();
-                        if (measurement.ConcentricCylindersRotationalSpeed is not null)
-                        {
-                            measurement.ConcentricCylindersRotationalSpeed.Value = 300.0 / 60.0;
-                        }
-                        if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
-                        {
-                            measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt300RPMAtMeasuredTemperatureAndPressure.Value;
-                        }
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
-                        measurement = new FlowCurveMeasurement();
-                        if (measurement.ConcentricCylindersRotationalSpeed is not null)
-                        {
-                            measurement.ConcentricCylindersRotationalSpeed.Value = 600.0 / 60.0;
-                        }
-                        if (measurement.ConcentricCylindersShearStressNewtonianHypothesis is not null)
-                        {
-                            measurement.ConcentricCylindersShearStressNewtonianHypothesis.Value = ActivePitRawData.ShearStressAt600RPMAtMeasuredTemperatureAndPressure.Value;
-                        }
-                        ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
-                        Calibrate(ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements, ref yieldStress, ref consistencyIndex, ref flowBehaviorIndex);
-                    }
-                    if (ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure is not null &&
-                        (consistencyIndex is not null ||
-                         ActivePitRawData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure != null))
-                    {
-                        if (consistencyIndex is not null)
-                        {
-                            ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure.Value = consistencyIndex;
-                        }
-                        else
-                        {
-                            ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure!.Value;
-                        }
-                    }
-                    if (ActivePitOutputData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure is not null &&
-                        (flowBehaviorIndex is not null ||
-                         ActivePitRawData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure != null))
-                    {
-                        if (flowBehaviorIndex is not null)
-                        {
-                            ActivePitOutputData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure.Value = flowBehaviorIndex;
-                        }
-                        else
-                        {
-                            ActivePitOutputData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YPLFlowBehaviorIndexAtMeasuredTemperatureAndPressure!.Value;
-                        }
-                    }
-                    if (ActivePitOutputData.YPLYieldStressAtMeasuredTemperatureAndPressure is not null && 
-                        (yieldStress is not null ||
-                         ActivePitRawData.YPLYieldStressAtMeasuredTemperatureAndPressure != null))
-                    {
-                        if (yieldStress is not null)
-                        {
-                            ActivePitOutputData.YPLYieldStressAtMeasuredTemperatureAndPressure.Value = yieldStress;
-                        }
-                        else
-                        {
-                            ActivePitOutputData.YPLYieldStressAtMeasuredTemperatureAndPressure.Value = ActivePitRawData.YPLYieldStressAtMeasuredTemperatureAndPressure!.Value;
-                        }
-                    }
-                    if (ActivePitOutputData.MeasuredPressure is not null && ActivePitRawData.MeasuredPressure != null)
-                    {
-                        ActivePitOutputData.MeasuredPressure.Value = ActivePitRawData.MeasuredPressure.Value;
-                    }
-                    if (ActivePitOutputData.MeasuredPressure is not null && ActivePitRawData.MeasuredPressure != null)
-                    {
-                        ActivePitOutputData.MeasuredPressure.Value = ActivePitRawData.MeasuredPressure.Value;
-                    }
-                    await PublishBlackboardAsync(ActivePitOutputData, stoppingToken);
-                    DateTime d2 = DateTime.UtcNow;
-                    double elapsed = (d2 - d1).TotalSeconds;
-                    lock (_lock)
-                    {
-                        if (Logger is not null && Logger.IsEnabled(LogLevel.Information) &&
-                            ActivePitOutputData.MeasuredPressure is not null &&
-                            ActivePitOutputData.MeasuredPressure.Value is not null)
-                        {
-                            Logger.LogInformation("Measured Pressure: " + ActivePitOutputData.MeasuredPressure.Value.Value.ToString("F3"));
-                        }
-                    }
-                    k = 0;
+                }
+                catch (Exception e)
+                {
+                    Logger?.LogError(e.ToString());
                 }
                 ConfigurationUpdater<ConfigurationForOPCUA>.Instance.UpdateConfiguration(this);
             }
@@ -259,7 +268,7 @@ namespace DWIS.DAQBridge.BaraLogix.Server
                     YPLCorrector.RheogramFullyCorrected.Count == measurements.Count &&
                     YPLCorrector.YPLModelFullyCorrected is not null)
                 {
-                    for (int i = 0; i < measurements.Count; i++) 
+                    for (int i = 0; i < measurements.Count; i++)
                     {
                         measurements[i].ConcentricCylindersShearRateNonNewtonianHypothesis ??= new ScalarProperty();
                         measurements[i].ConcentricCylindersShearRateNonNewtonianHypothesis!.Value = YPLCorrector.RheogramFullyCorrected[i].ShearRate;
