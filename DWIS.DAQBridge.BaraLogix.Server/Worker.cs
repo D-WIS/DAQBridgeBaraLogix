@@ -150,6 +150,14 @@ namespace DWIS.DAQBridge.BaraLogix.Server
                             }
                             ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements.Add(measurement);
                             Calibrate(ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements, ref yieldStress, ref consistencyIndex, ref flowBehaviorIndex);
+                            if ((yieldStress is not null && (double.IsInfinity(yieldStress.Value) || double.IsNaN(yieldStress.Value))) ||
+                                (consistencyIndex is not null && (double.IsInfinity(consistencyIndex.Value) || double.IsNaN(consistencyIndex.Value))) ||
+                                (flowBehaviorIndex is not null && (double.IsInfinity(flowBehaviorIndex.Value) || double.IsNaN(flowBehaviorIndex.Value))))
+                            {
+                                yieldStress = null;
+                                consistencyIndex = null;
+                                flowBehaviorIndex = null;
+                            }
                         }
                         if (ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure is not null &&
                             (consistencyIndex is not null ||
