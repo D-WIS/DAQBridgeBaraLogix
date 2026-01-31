@@ -158,6 +158,54 @@ namespace DWIS.DAQBridge.BaraLogix.Server
                                 consistencyIndex = null;
                                 flowBehaviorIndex = null;
                             }
+                            foreach (var m in ActivePitOutputData.FlowCurveAtMeasuredTemperatureAndPressure.Measurements)
+                            {
+                                if (m is not null)
+                                {
+                                    if (m.ConcentricCylindersTorque is not null &&
+                                        m.ConcentricCylindersTorque.Value is not null &&
+                                        (double.IsNaN(m.ConcentricCylindersTorque.Value.Value) ||
+                                         double.IsInfinity(m.ConcentricCylindersTorque.Value.Value)))
+                                    {
+                                        m.ConcentricCylindersTorque.Value = null;
+                                    }
+                                    if (m.ConcentricCylindersRotationalSpeed is not null &&
+                                        m.ConcentricCylindersRotationalSpeed.Value is not null &&
+                                        (double.IsNaN(m.ConcentricCylindersRotationalSpeed.Value.Value) ||
+                                         double.IsInfinity(m.ConcentricCylindersRotationalSpeed.Value.Value)))
+                                    {
+                                        m.ConcentricCylindersRotationalSpeed.Value = null;
+                                    }
+                                    if (m.ConcentricCylindersShearRateNewtonianHypothesis is not null &&
+                                        m.ConcentricCylindersShearRateNewtonianHypothesis.Value is not null &&
+                                        (double.IsNaN(m.ConcentricCylindersShearRateNewtonianHypothesis.Value.Value) ||
+                                         double.IsInfinity(m.ConcentricCylindersShearRateNewtonianHypothesis.Value.Value)))
+                                    {
+                                        m.ConcentricCylindersShearRateNewtonianHypothesis.Value = null;
+                                    }
+                                    if (m.ConcentricCylindersShearRateNonNewtonianHypothesis is not null &&
+                                        m.ConcentricCylindersShearRateNonNewtonianHypothesis.Value is not null &&
+                                        (double.IsNaN(m.ConcentricCylindersShearRateNonNewtonianHypothesis.Value.Value) ||
+                                         double.IsInfinity(m.ConcentricCylindersShearRateNonNewtonianHypothesis.Value.Value)))
+                                    {
+                                        m.ConcentricCylindersShearRateNonNewtonianHypothesis.Value = null;
+                                    }
+                                    if (m.ConcentricCylindersShearStressNewtonianHypothesis is not null &&
+                                        m.ConcentricCylindersShearStressNewtonianHypothesis.Value is not null &&
+                                        (double.IsNaN(m.ConcentricCylindersShearStressNewtonianHypothesis.Value.Value) ||
+                                         double.IsInfinity(m.ConcentricCylindersShearStressNewtonianHypothesis.Value.Value)))
+                                    {
+                                        m.ConcentricCylindersShearStressNewtonianHypothesis.Value = null;
+                                    }
+                                    if (m.ConcentricCylindersShearStressNonNewtonianHypothesis is not null &&
+                                        m.ConcentricCylindersShearStressNonNewtonianHypothesis.Value is not null &&
+                                        (double.IsNaN(m.ConcentricCylindersShearStressNonNewtonianHypothesis.Value.Value) ||
+                                         double.IsInfinity(m.ConcentricCylindersShearStressNonNewtonianHypothesis.Value.Value)))
+                                    {
+                                        m.ConcentricCylindersShearStressNonNewtonianHypothesis.Value = null;
+                                    }
+                                }
+                            }
                         }
                         if (ActivePitOutputData.YPLConsistencyIndexAtMeasuredTemperatureAndPressure is not null &&
                             (consistencyIndex is not null ||
@@ -320,7 +368,14 @@ namespace DWIS.DAQBridge.BaraLogix.Server
             {
                 if (flowCurveProp.Measurements is not null)
                 {
-                    val = System.Text.Json.JsonSerializer.Serialize(flowCurveProp.Measurements);
+                    try
+                    {
+                        val = System.Text.Json.JsonSerializer.Serialize(flowCurveProp.Measurements);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger?.LogError(e.ToString());
+                    }
                 }
             }
             else
