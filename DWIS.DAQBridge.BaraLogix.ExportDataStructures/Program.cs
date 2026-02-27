@@ -1,7 +1,4 @@
 ﻿using DWIS.DAQBridge.BaraLogix.Model;
-using NJsonSchema;
-using System;
-using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

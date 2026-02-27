@@ -4,18 +4,17 @@ using OSDC.DotnetLibraries.General.Common;
 using System.Reflection;
 using YPLCalibrationFromRheometer.Model;
 using DWIS.DAQBridge.BaraLogix.Model;
-using System.Linq.Expressions;
 
 namespace DWIS.DAQBridge.BaraLogix.Server
 {
-    public class Worker : DWISWorkerWithOPCUA<ConfigurationForOPCUA>
+    public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaraLogics>
     {
         private ActivePitRawData ActivePitRawData { get; set; } = new ActivePitRawData();
         private ActivePitOutputData ActivePitOutputData { get; set; } = new ActivePitOutputData();
 
         private TimeSpan OPCUALoopSpan { get; set; } = TimeSpan.FromSeconds(1);
 
-        public Worker(ILogger<IDWISWorker<ConfigurationForOPCUA>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
+        public Worker(ILogger<IDWISWorker<ConfigurationForBaraLogics>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
         {
         }
 
@@ -26,6 +25,10 @@ namespace DWIS.DAQBridge.BaraLogix.Server
             if (Configuration is not null && _DWISClient != null && _DWISClient.Connected)
             {
                 OPCUALoopSpan = Configuration.OPCUALoopDuration;
+                if (Configuration.InitializeInputOPCUAVariables)
+                {
+                    await RegisterToOPCUA(ActivePitRawData, "BaraLogixDataManifest", "Halliburton");
+                }
                 await RegisterToBlackboard(ActivePitOutputData);
                 await Loop(stoppingToken);
             }
@@ -274,7 +277,7 @@ namespace DWIS.DAQBridge.BaraLogix.Server
                 {
                     Logger?.LogError(e.ToString());
                 }
-                ConfigurationUpdater<ConfigurationForOPCUA>.Instance.UpdateConfiguration(this);
+                ConfigurationUpdater<ConfigurationForBaraLogics>.Instance.UpdateConfiguration(this);
             }
         }
 

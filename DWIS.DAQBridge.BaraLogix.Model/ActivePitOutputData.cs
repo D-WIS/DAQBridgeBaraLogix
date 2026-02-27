@@ -8,12 +8,10 @@ using System.Reflection;
 
 namespace DWIS.DAQBridge.BaraLogix.Model
 {
-    public class ActivePitOutputData : DWISDataWithOPCUA
+    public class ActivePitOutputData : DWISData
     {
-        private static readonly Lazy<IReadOnlyDictionary<PropertyInfo, OPCUANode>> LocalOPCUANodes = new(BuildOPCUANodes(typeof(ActivePitOutputData)));
         private static readonly Lazy<IReadOnlyDictionary<PropertyInfo, Dictionary<string, QuerySpecification>>> LocalSparQLQueries = new(BuildSparQLQueries(typeof(ActivePitOutputData)));
         private static readonly Lazy<IReadOnlyDictionary<PropertyInfo, ManifestFile>> LocalManifests = new(BuildManifests(typeof(ActivePitOutputData), "BaraLogixDataManifest", "Halliburton", "DWISBridge"));
-        public override Lazy<IReadOnlyDictionary<PropertyInfo, OPCUANode>> OPCUANodes { get => LocalOPCUANodes; }
         public override Lazy<IReadOnlyDictionary<PropertyInfo, Dictionary<string, QuerySpecification>>> SparQLQueries { get => LocalSparQLQueries; }
         public override Lazy<IReadOnlyDictionary<PropertyInfo, ManifestFile>> Manifests { get => LocalManifests; }
 

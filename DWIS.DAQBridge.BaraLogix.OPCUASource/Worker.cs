@@ -1,7 +1,5 @@
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.RigOS.Common.Worker;
-using Microsoft.Extensions.Logging;
-using OSDC.DotnetLibraries.General.Common;
 
 namespace DWIS.DAQBridge.BaraLogix.OPCUASource
 {

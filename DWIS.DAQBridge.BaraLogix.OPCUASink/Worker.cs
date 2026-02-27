@@ -1,6 +1,5 @@
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.RigOS.Common.Worker;
-using OSDC.DotnetLibraries.General.Common;
 using System.Reflection;
 
 namespace DWIS.DAQBridge.BaraLogix.OPCUASink
