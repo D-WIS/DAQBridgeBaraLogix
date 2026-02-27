@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DWIS.DAQBridge.BaraLogix.Server
 {
-    public class ConfigurationForBaraLogics : ConfigurationForOPCUA
+    public class ConfigurationForBaraLogix : ConfigurationForOPCUA
     {
         public bool InitializeInputOPCUAVariables { get; set; } = true;
     }

@@ -7,14 +7,14 @@ using DWIS.DAQBridge.BaraLogix.Model;
 
 namespace DWIS.DAQBridge.BaraLogix.Server
 {
-    public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaraLogics>
+    public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaraLogix>
     {
         private ActivePitRawData ActivePitRawData { get; set; } = new ActivePitRawData();
         private ActivePitOutputData ActivePitOutputData { get; set; } = new ActivePitOutputData();
 
         private TimeSpan OPCUALoopSpan { get; set; } = TimeSpan.FromSeconds(1);
 
-        public Worker(ILogger<IDWISWorker<ConfigurationForBaraLogics>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
+        public Worker(ILogger<IDWISWorker<ConfigurationForBaraLogix>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
         {
         }
 
@@ -277,7 +277,7 @@ namespace DWIS.DAQBridge.BaraLogix.Server
                 {
                     Logger?.LogError(e.ToString());
                 }
-                ConfigurationUpdater<ConfigurationForBaraLogics>.Instance.UpdateConfiguration(this);
+                ConfigurationUpdater<ConfigurationForBaraLogix>.Instance.UpdateConfiguration(this);
             }
         }
 
